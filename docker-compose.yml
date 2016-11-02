@@ -1,0 +1,52 @@
+version: '2'
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /etc/nginx/conf.d
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
+      - ./certs:/etc/nginx/certs:ro
+
+  letsencrypt-nginx-proxy-companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/nginx/certs:rw
+
+  keycloak:
+    image: ak1394/keycloak
+    expose:
+      - "8080"
+    environment:
+      - KEYCLOAK_USER=${KEYCLOAK_USER} 
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD}
+      - VIRTUAL_HOST=${KEYCLOAK_HOST}
+      - LETSENCRYPT_HOST=${KEYCLOAK_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+
+  redirect:
+    image: ak1394/react-native-login-web-redirect
+    expose:
+      - "8080"
+    environment:
+      - VIRTUAL_HOST=${REDIRECT_HOST}
+      - LETSENCRYPT_HOST=${REDIRECT_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - APPSITE_HOST=${APPSITE_HOST}
+
+  appsite:
+    image: ak1394/react-native-login-web-appsite
+    expose:
+      - "8080"
+    environment:
+      - VIRTUAL_HOST=${APPSITE_HOST}
+      - LETSENCRYPT_HOST=${APPSITE_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - APP_ID=${APP_ID}
