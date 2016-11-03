@@ -32,7 +32,7 @@ services:
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
 
   redirect:
-    image: ak1394/react-native-login-web-redirect
+    image: ak1394/react-native-login-redirect
     expose:
       - "8080"
     environment:
@@ -42,7 +42,7 @@ services:
       - APPSITE_HOST=${APPSITE_HOST}
 
   appsite:
-    image: ak1394/react-native-login-web-appsite
+    image: ak1394/react-native-login-appsite
     expose:
       - "8080"
     environment:
